@@ -1,11 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as dates
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from textblob import TextBlob
 from wordcloud import WordCloud
 import warnings
+import numpy as np
 warnings.filterwarnings('ignore')
 
 stops = stopwords.words('english')
@@ -14,6 +16,7 @@ lem = WordNetLemmatizer()
 swig = pd.read_csv('swiggy.csv')[:500]
 zoma = pd.read_csv('zomato.csv')[:500]
 
+# Compare Retweet Count
 swig_rt = swig['retweet_count'].sum()
 zoma_rt = zoma['retweet_count'].sum()
 plt.bar(['Swiggy','Zomato'],[swig_rt,zoma_rt])
@@ -22,6 +25,7 @@ plt.ylabel('No. of Retweets')
 plt.title('Retweet Counts of Swiggy and Zomato Tweets')
 plt.show()
 
+# Compare Tweet Length
 swig_len = swig['length'].sum()/len(swig['length'])
 zoma_len = zoma['length'].sum()/len(zoma['length'])
 plt.bar(['Swiggy','Zomato'],[swig_len,zoma_len])
@@ -30,6 +34,7 @@ plt.ylabel('Average Tweet Length')
 plt.title('Average Tweet Length of Swiggy and Zomato Tweets')
 plt.show()
 
+# Compare Favorite Count
 swig_fav = swig['favorite_count'].sum()
 zoma_fav = zoma['favorite_count'].sum()
 plt.bar(['Swiggy','Zomato'],[swig_fav,zoma_fav])
@@ -38,6 +43,38 @@ plt.ylabel('Favorite Count')
 plt.title('Favorite Counts of Swiggy and Zomato Tweets')
 plt.show()
 
+# Compare Trends
+def analyze_trends(dataset, company):
+    dataset['created_at'] = pd.to_datetime(dataset['created_at'])
+    dataset['date'] = dataset['created_at'].dt.date
+    dataset['hour'] = dataset['created_at'].dt.hour
+
+    date_freq = dataset['date'].value_counts()
+    hour_freq = dataset['hour'].value_counts()
+
+    plt.bar(hour_freq.index, hour_freq.values)
+    plt.xlabel('Hour of day when tweeted')
+    plt.ylabel('No. of Tweets')
+    plt.title(f'Hourly Tweet Activity of {company} tweets')
+    plt.show()
+
+    x = date_freq.index
+    x_num = dates.date2num(x)
+    y = date_freq.values
+    plt.scatter(x,y)
+    z = np.polyfit(x_num, y, deg=1)
+    p = np.poly1d(z)
+    plt.plot(x, p(x_num))
+
+    plt.xlabel('Date when tweeted')
+    plt.ylabel('No. of Tweets')
+    plt.title(f'Tweet Trend of {company} tweets')
+    plt.show()
+
+analyze_trends(zoma,'Zomato')
+analyze_trends(swig,'Swiggy')
+
+# Compare Sentiment
 def analyze_sentiment(dataset, company):
     dataset['polarity'] = ''
     dataset['sentiment'] = ''
@@ -73,6 +110,7 @@ def analyze_sentiment(dataset, company):
 zoma_corpus = analyze_sentiment(zoma,'Zomato')
 swig_corpus = analyze_sentiment(swig,'Swiggy')
 
+# Compare Word Cloud
 def generate_wordcloud(corpus, company):
     cloud = WordCloud(background_color='white', width=800, height=800, max_words=50).generate(corpus)
     plt.imshow(cloud)
