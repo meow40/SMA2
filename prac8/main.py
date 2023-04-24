@@ -38,7 +38,7 @@ for i,row in dataset.iterrows():
 cloud = WordCloud(background_color='white',width=800,height=800, max_words=50).generate(corpus)
 plt.imshow(cloud)
 plt.axis('off')
-plt.title('Word Cloud for what customers are saying about Apple Iphone')
+plt.title('Word Cloud for what customers are saying about Apple Iphone :- ')
 plt.show()
 
 dataset = dataset[['cleaned_review','sentiment']]
@@ -47,4 +47,3 @@ plt.xlabel('Count')
 plt.ylabel('Sentiment')
 plt.title('Sentiment of Reviews of IPhone')
 plt.show()
-
